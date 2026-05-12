@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In</title>
+    <link rel="stylesheet" href="forms.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hint-panel" aria-label="Learner hints">
+        <h2>Login Template Steps</h2>
+        <ol>
+          <li>
+            Reuse the same login validation rules from earlier lessons before
+            checking credentials.
+          </li>
+          <li>
+            Call <code>findUser(username)</code> after the form is already
+            valid.
+          </li>
+          <li>
+            If no user exists, show <code>User not found.</code> on the username
+            field.
+          </li>
+          <li>
+            If the password does not match, show
+            <code>Incorrect password.</code> on the password field.
+          </li>
+          <li>
+            If both match, call <code>saveSession(user)</code> and redirect to
+            <code>index.html</code>.
+          </li>
+        </ol>
+      </section>
+
+      <section class="card">
+        <h1>Log in</h1>
+
+        <form id="login-form" novalidate>
+          <div class="form-row" data-field="username">
+            <label class="field-label" for="username">Username</label>
+            <input
+              class="field-input"
+              id="username"
+              type="email"
+              placeholder="Enter email"
+            />
+            <span class="field-error"></span>
+          </div>
+
+          <div class="form-row" data-field="password">
+            <label class="field-label" for="password">Password</label>
+            <input
+              class="field-input"
+              id="password"
+              type="password"
+              placeholder="Enter password"
+            />
+            <span class="field-error"></span>
+          </div>
+
+          <button class="submit-btn" type="submit">Log in</button>
+        </form>
+
+        <p class="card-footer">
+          Don't have an account? <a href="signup.html">Sign up</a>
+        </p>
+      </section>
+    </main>
+
+    <script src="forms.js"></script>
+    <script src="store.js"></script>
+    <script>
+      function getFormValues() {
+        return collectValues(["username", "password"]);
+      }
+
+      function validateLoginForm(values) {
+        return validateFields(["username", "password"], values);
+      }
+
+      function handleSubmit(event) {
+        event.preventDefault();
+
+        var values = getFormValues();
+        var isValid = validateLoginForm(values);
+        if (!isValid) {
+          return;
+        }
+
+        var user = findUser(values.username);
+
+        if (user === null) {
+          setFieldState("username", "User not found.");
+          clearFieldState("password");
+          return;
+        }
+
+        if (user.password !== values.password) {
+          clearFieldState("username");
+          setFieldState("password", "Incorrect password.");
+          return;
+        }
+
+        clearFieldState("username");
+        clearFieldState("password");
+        saveSession(user);
+        window.location.href = "index.html";
+      }
+
+      window.addEventListener("load", function () {
+        if (getSession()) {
+          window.location.href = "index.html";
+          return;
+        }
+
+        attachClearOnInput(["username", "password"]);
+
+        var form = document.getElementById("login-form");
+        form.addEventListener("submit", handleSubmit);
+      });
+    </script>
+  </body>
+</html>

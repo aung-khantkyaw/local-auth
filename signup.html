@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up</title>
+<link rel="stylesheet" href="forms.css">
+</head>
+<body>
+<main class="page">
+  <section class="hint-panel" aria-label="Learner hints">
+    <h2>Signup Template Steps</h2>
+    <ol>
+      <li>Reuse your shared validation helpers from <code>forms.js</code> instead of rewriting field validation here.</li>
+      <li>Validate <code>displayName</code>, <code>username</code>, and <code>password</code> first.</li>
+      <li>After field validation passes, call <code>findUser(username)</code> from <code>store.js</code>.</li>
+      <li>If the username already exists, show <code>Username already taken.</code> on the username field.</li>
+      <li>If the username is new, call <code>addUser(displayName, username, password)</code> and redirect to <code>login.html</code>.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h1>Create account</h1>
+
+    <form id="signup-form" novalidate>
+      <div class="form-row" data-field="displayName">
+        <label class="field-label" for="displayName">Display name</label>
+        <input class="field-input" id="displayName" type="text" placeholder="Enter display name">
+        <span class="field-error"></span>
+      </div>
+
+      <div class="form-row" data-field="username">
+        <label class="field-label" for="username">Username</label>
+        <input class="field-input" id="username" type="email" placeholder="Enter email">
+        <span class="field-error"></span>
+      </div>
+
+      <div class="form-row" data-field="password">
+        <label class="field-label" for="password">Password</label>
+        <input class="field-input" id="password" type="password" placeholder="Create password">
+        <span class="field-error"></span>
+      </div>
+
+      <button class="submit-btn" type="submit">Sign up</button>
+    </form>
+
+    <p class="card-footer">
+      Already have an account? <a href="login.html">Log in</a>
+    </p>
+  </section>
+</main>
+
+<script src="forms.js"></script>
+<script src="store.js"></script>
+<script>
+
+  function getFormValues() {
+    return collectValues(['displayName', 'username', 'password']);
+  }
+
+  function validateSignupForm(values) {
+    return validateFields(['displayName', 'username', 'password'], values);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
+    var values = getFormValues();
+    var isValid = validateSignupForm(values);
+    if (!isValid) {
+      return;
+    }
+
+    var existingUser = findUser(values.username);
+    if (existingUser) {
+      setFieldState('username', 'Username already taken.');
+      return;
+    }
+
+    addUser(values.displayName, values.username, values.password);
+    window.location.href = 'login.html';
+  }
+
+  window.addEventListener('load', function() {
+    attachClearOnInput(['displayName', 'username', 'password']);
+    document.getElementById('signup-form').addEventListener('submit', handleSubmit);
+  });
+</script>
+</body>
+</html>
