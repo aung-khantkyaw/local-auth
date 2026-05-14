@@ -1,38 +1,62 @@
-function getUsers() {
-  return JSON.parse(sessionStorage.getItem('users') || '[]');
+function getUser(username) {
+  var raw = localStorage.getItem("users/" + username);
+  return raw ? JSON.parse(raw) : null;
 }
 
-function saveUsers(users) {
-  sessionStorage.setItem('users', JSON.stringify(users));
+async function hashPassword(password, salt) {
+  var encoder = new TextEncoder();
+  var data = encoder.encode(salt + password);
+  var hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  var hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  var hashHex = hashArray
+    .map(function (byte) {
+      return byte.toString(16).padStart(2, "0");
+    })
+    .join("");
+
+  return hashHex;
 }
 
-function findUser(username) {
-  return getUsers().find(function(user) {
-    return user.username === username;
-  }) || null;
+function generateSalt() {
+  var bytes = new Uint8Array(16);
+
+  crypto.getRandomValues(bytes);
+
+  return Array.from(bytes)
+    .map(function (byte) {
+      return byte.toString(16).padStart(2, "0");
+    })
+    .join("");
 }
 
-function addUser(displayName, username, password) {
-  var users = getUsers();
-  users.push({
+async function setUser(displayName, username, password) {
+  var salt = generateSalt();
+  var hash = await hashPassword(password, salt);
+
+  var user = {
     displayName: displayName,
     username: username,
-    password: password
-  });
-  saveUsers(users);
+    salt: salt,
+    hash: hash,
+  };
+  localStorage.setItem("users/" + username, JSON.stringify(user));
 }
 
 function getSession() {
-  return JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  return JSON.parse(sessionStorage.getItem("currentUser") || "null");
 }
 
 function saveSession(user) {
-  sessionStorage.setItem('currentUser', JSON.stringify({
-    username: user.username,
-    displayName: user.displayName
-  }));
+  sessionStorage.setItem(
+    "currentUser",
+    JSON.stringify({
+      username: user.username,
+      displayName: user.displayName,
+    }),
+  );
 }
 
 function clearSession() {
-  sessionStorage.removeItem('currentUser');
+  sessionStorage.removeItem("currentUser");
 }

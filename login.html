@@ -80,7 +80,7 @@
         return validateFields(["username", "password"], values);
       }
 
-      function handleSubmit(event) {
+      async function handleSubmit(event) {
         event.preventDefault();
 
         var values = getFormValues();
@@ -89,7 +89,7 @@
           return;
         }
 
-        var user = findUser(values.username);
+        var user = getUser(values.username);
 
         if (user === null) {
           setFieldState("username", "User not found.");
@@ -97,7 +97,9 @@
           return;
         }
 
-        if (user.password !== values.password) {
+        var submittedHash = await hashPassword(values.password, user.salt);
+
+        if (submittedHash !== user.hash) {
           clearFieldState("username");
           setFieldState("password", "Incorrect password.");
           return;
